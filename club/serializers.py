@@ -8,7 +8,7 @@ from . import models
 class SponsorSerializer(ModelSerializer):
     class Meta:
         model = models.Sponsor
-        fields = ('id', 'first_name', 'last_name', 'phone', 'type', 'payment_amount', 'spent_amount', 'organization_name')
+        fields = ('id', 'first_name', 'last_name', 'phone', 'type', 'payment_amount', 'spent_amount', 'organization_name', 'status')
 
 
 class StudentSerializer(ModelSerializer):
@@ -20,17 +20,20 @@ class StudentSerializer(ModelSerializer):
 class DonationSerializer(ModelSerializer):
     class Meta:
         model = models.Donation
-        fields = ('id', 'sponsor', 'student', 'amount', 'status')
+        fields = ('id', 'sponsor', 'student', 'amount')
 
     def create(self, validated_data):
         sponsor_id = validated_data['sponsor'].id
         student_id = validated_data['student'].id
-        amount = validated_data['amount']
-        status = validated_data['status']
+        print(sponsor_id)
 
-        if status == 'Tasdiqlangan':
+
+
+        amount = validated_data['amount']
+        if models.Sponsor.objects.get(id=sponsor_id).status == 'Tasdiqlangan':
             if models.Sponsor.objects.filter(id=sponsor_id).exists() and models.Student.objects.filter(id=student_id).exists():
                 sponsor = models.Sponsor.objects.get(id=sponsor_id)
+
                 student = models.Student.objects.get(id=student_id)
                 if sponsor.payment_amount-sponsor.spent_amount >= amount:
                     if amount <= student.needed_amount - student.allocated_amount:
